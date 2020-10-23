@@ -22,6 +22,7 @@ class UserTab(object):
 
         name_button_layout={'width':'25%'}
         widget_layout = {'width': '15%'}
+        widget2_layout = {'width': '10%'}
         units_button_layout ={'width':'15%'}
         desc_button_layout={'width':'45%'}
         divider_button_layout={'width':'40%'}

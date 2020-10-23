@@ -18,6 +18,8 @@ except:
 # from svg import SVGTab
 from substrates import SubstrateTab
 from animate_tab import AnimateTab
+from physiboss import PhysiBoSSTab
+from populations import PopulationsTab
 from pathlib import Path
 import platform
 import subprocess
@@ -55,7 +57,9 @@ if xml_root.find('.//cell_definitions'):
     cell_types_tab = CellTypesTab()
 
 # svg = SVGTab()
-sub = SubstrateTab()
+sub = SubstrateTab(cell_types_tab)
+populations = PopulationsTab()
+physiboss = PhysiBoSSTab()
 animate_tab = AnimateTab()
 
 nanoHUB_flag = False
@@ -116,6 +120,7 @@ def read_config_cb(_b):
         # print("read_config_cb():  is_dir True, calling update_params")
         sub.update_params(config_tab, user_tab)
         sub.update(read_config.value)
+        physiboss.update(read_config.value)
     # else:  # may want to distinguish "DEFAULT" from other saved .xml config files
         # FIXME: really need a call to clear the visualizations
         # svg.update('')
@@ -136,18 +141,20 @@ def write_config_file(name):
     config_tab.fill_xml(xml_root)
     microenv_tab.fill_xml(xml_root)
     user_tab.fill_xml(xml_root)
+    if xml_root.find('.//cell_definitions'):
+        cell_types_tab.fill_xml(xml_root)
     tree.write(name)
 
     # update substrate mesh layout (beware of https://docs.python.org/3/library/functions.html#round)
     sub.update_params(config_tab, user_tab)
     # sub.numx =  math.ceil( (config_tab.xmax.value - config_tab.xmin.value) / config_tab.xdelta.value )
     # sub.numy =  math.ceil( (config_tab.ymax.value - config_tab.ymin.value) / config_tab.ydelta.value )
-    # print("pc4covid19_v3.py: ------- sub.numx, sub.numy = ", sub.numx, sub.numy)
+    # print("pc4covid19.py: ------- sub.numx, sub.numy = ", sub.numx, sub.numy)
 
 
 # callback from write_config_button
 # def write_config_file_cb(b):
-#     path_to_share = os.path.join('~', '.local','share','pc4covid19_v3')
+#     path_to_share = os.path.join('~', '.local','share','pc4covid19')
 #     dirname = os.path.expanduser(path_to_share)
 
 #     val = write_config_box.value
@@ -161,7 +168,7 @@ def write_config_file(name):
 # default & previous config options)
 def get_config_files():
     cf = {'DEFAULT': full_xml_filename}
-    path_to_share = os.path.join('~', '.local','share','pc4covid19_v3')
+    path_to_share = os.path.join('~', '.local','share','pc4covid19')
     dirname = os.path.expanduser(path_to_share)
     try:
         os.makedirs(dirname)
@@ -173,12 +180,12 @@ def get_config_files():
 
     # Find the dir path (full_path) to the cached dirs
     if nanoHUB_flag:
-        full_path = os.path.expanduser("~/data/results/.submit_cache/pc4covid19_v3")  # does Windows like this?
+        full_path = os.path.expanduser("~/data/results/.submit_cache/pc4covid19")  # does Windows like this?
     else:
         # local cache
         try:
             cachedir = os.environ['CACHEDIR']
-            full_path = os.path.join(cachedir, "pc4covid19_v3")
+            full_path = os.path.join(cachedir, "pc4covid19")
         except:
             # print("Exception in get_config_files")
             return cf
@@ -217,6 +224,8 @@ def fill_gui_params(config_file):
     config_tab.fill_gui(xml_root)
     microenv_tab.fill_gui(xml_root)
     user_tab.fill_gui(xml_root)
+    if xml_root.find('.//cell_definitions'):
+        cell_types_tab.fill_gui(xml_root)
 
 
 def run_done_func(s, rdir):
@@ -225,7 +234,7 @@ def run_done_func(s, rdir):
     
     if nanoHUB_flag:
         # Email the user that their job has completed
-        os.system("submit  mail2self -s 'nanoHUB pc4covid19_v3' -t 'Your Run completed.'&")
+        os.system("submit  mail2self -s 'nanoHUB pc4covid19' -t 'Your Run completed.'&")
 
     # save the config file to the cache directory
     shutil.copy('config.xml', rdir)
@@ -245,7 +254,8 @@ def run_done_func(s, rdir):
     # and update visualizations
     # svg.update(rdir)
     sub.update(rdir)
-
+    physiboss.update(rdir)
+    populations.update(rdir)
     animate_tab.gen_button.disabled = False
 
     # with debug_view:
@@ -295,11 +305,12 @@ def run_sim_func(s):
     # svg.update(tdir)
     # sub.update_params(config_tab)
     sub.update(tdir)
+    physiboss.update(tdir)
     # animate_tab.update(tdir)
 
     if nanoHUB_flag:
         if remote_cb.value:
-            s.run(run_name, "-v ncn-hub_M@brown -n 8 -w 1440 pc4covid19_v3-r7 config.xml")   # "-r7" suffix??
+            s.run(run_name, "-v ncn-hub_M@brown -n 8 -w 1440 pc4covid19-r7 config.xml")   # "-r7" suffix??
         else:
             # read_config.index = 0   # reset Dropdown 'Load Config' to 'DEFAULT' when Run interactively
             s.run(run_name, "--local ../bin/myproj config.xml")
@@ -323,6 +334,8 @@ def outcb(s):
         # sub.update('')
         # sub.update_params(config_tab)
         sub.update()
+        physiboss.update()
+        populations.update()
     return s
 
 
@@ -356,7 +369,7 @@ def run_button_cb(s):
     # svg.update(tdir)
     # sub.update_params(config_tab)
     sub.update(tdir)
-
+    physiboss.update(tdir)
     subprocess.Popen(["../bin/myproj", "config.xml"])
 
 
@@ -365,14 +378,14 @@ if nanoHUB_flag:
     run_button = Submit(label='Run',
                        start_func=run_sim_func,
                         done_func=run_done_func,
-                        cachename='pc4covid19_v3',
+                        cachename='pc4covid19',
                         showcache=False,
                         outcb=outcb)
 else:
     if (hublib_flag):
         run_button = RunCommand(start_func=run_sim_func,
                             done_func=run_done_func,
-                            cachename='pc4covid19_v3',
+                            cachename='pc4covid19',
                             showcache=False,
                             outcb=outcb)  
     else:
@@ -394,24 +407,22 @@ if nanoHUB_flag or hublib_flag:
     read_config.observe(read_config_cb, names='value') 
 
 tab_height = 'auto'
-#tab_layout = widgets.Layout(width='auto',height=tab_height, overflow_y='scroll',)   # border='2px solid black',
-tab_layout = widgets.Layout(width='auto',height=tab_height)   # border='2px solid black',
+tab_layout = widgets.Layout(width='auto',height=tab_height, overflow_y='scroll',)   # border='2px solid black',
 
 if xml_root.find('.//cell_definitions'):
-    titles = ['About', 'Config Basics', 'Microenvironment', 'User Params', 'Cell Types', 'Out: Plots', 'Animate']
-    tabs = widgets.Tab(children=[about_tab.tab, config_tab.tab, microenv_tab.tab, user_tab.tab, cell_types_tab.tab, sub.tab, animate_tab.tab],
-                   _titles={i: t for i, t in enumerate(titles)})
-#                   layout=tab_layout)
+    titles = ['About', 'Config Basics', 'Microenvironment', 'User Params', 'Cell Types', 'Out: Plots', 'Out: Populations', 'Out: PhysiBoSS', 'Animate']
+    tabs = widgets.Tab(children=[about_tab.tab, config_tab.tab, microenv_tab.tab, user_tab.tab, cell_types_tab.tab, sub.tab, populations.tab, physiboss.tab, animate_tab.tab],
+                   _titles={i: t for i, t in enumerate(titles)},
+                   layout=tab_layout)
 else:
-    titles = ['About', 'Config Basics', 'Microenvironment', 'User Params', 'Out: Plots', 'Animate']
-    tabs = widgets.Tab(children=[about_tab.tab, config_tab.tab, microenv_tab.tab, user_tab.tab, sub.tab, animate_tab.tab],
+    titles = ['About', 'Config Basics', 'Microenvironment', 'User Params', 'Out: Plots', 'Out: Populations', 'Out: PhysiBoSS', 'Animate']
+    tabs = widgets.Tab(children=[about_tab.tab, config_tab.tab, microenv_tab.tab, user_tab.tab, sub.tab,  populations.tab, physiboss.tab, animate_tab.tab],
                    _titles={i: t for i, t in enumerate(titles)},
                    layout=tab_layout)
 
 homedir = os.getcwd()
 
-# tool_title = widgets.Label(r'\(\textbf{pc4covid19_v3}\)')
-tool_title = widgets.Label(r'\(\textbf{PhysiCell model for SARS-CoV-2}\)')
+tool_title = widgets.Label(r'\(\textbf{pc4covid19}\)')
 if nanoHUB_flag or hublib_flag:
     # define this, but don't use (yet)
     remote_cb = widgets.Checkbox(indent=False, value=False, description='Submit as Batch Job to Clusters/Grid')

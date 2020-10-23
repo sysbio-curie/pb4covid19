@@ -36,7 +36,7 @@ warnings.filterwarnings("ignore")
 
 class SubstrateTab(object):
 
-    def __init__(self):
+    def __init__(self, celltypes_tab=None):
         
         self.output_dir = '.'
         # self.output_dir = 'tmpdir'
@@ -75,10 +75,7 @@ class SubstrateTab(object):
         # self.y_range = 2000.
 
         self.show_nucleus = False
-        self.semi_transparent = False
         self.show_edge = True
-
-        substrates_default_disabled_flag = True  # True = disable them by default; False=enable them
 
         # initial value
         self.field_index = 4
@@ -96,8 +93,8 @@ class SubstrateTab(object):
         tab_height = '500px'
         constWidth = '180px'
         constWidth2 = '150px'
-        # tab_layout = Layout(width='900px',   # border='2px solid black',
-                            # height=tab_height, ) #overflow_y='scroll')
+        tab_layout = Layout(width='900px',   # border='2px solid black',
+                            height=tab_height, ) #overflow_y='scroll')
 
         max_frames = 1   
         # self.mcds_plot = interactive(self.plot_substrate, frame=(0, max_frames), continuous_update=False)  
@@ -118,7 +115,7 @@ class SubstrateTab(object):
             # description='# cell frames',
         self.max_frames = BoundedIntText(
             min=0, max=99999, value=max_frames,
-            description='# cell frames',
+            description='# frames',
            layout=Layout(width='160px'),
         )
         self.max_frames.observe(self.update_max_frames)
@@ -133,7 +130,6 @@ class SubstrateTab(object):
         self.mcds_field = Dropdown(
             options={'director signal': 0, 'cargo signal':1},
             value=0,
-            disabled = substrates_default_disabled_flag,
             #     description='Field',
            layout=Layout(width=constWidth)
         )
@@ -263,29 +259,12 @@ class SubstrateTab(object):
         def cell_nucleus_toggle_cb(b):
             # self.update()
             if (self.cell_nucleus_toggle.value):  
-                # self.show_nucleus = True
-                self.show_nucleus = False
+                self.show_nucleus = True
             else:
                 self.show_nucleus = False
             self.i_plot.update()
 
         self.cell_nucleus_toggle.observe(cell_nucleus_toggle_cb)
-
-        #---------------------
-        self.cell_semitrans_toggle = Checkbox(
-            description='translucent',
-            disabled=False,
-            value = self.semi_transparent,
-#           layout=Layout(width=constWidth2),
-        )
-        def cell_semitrans_toggle_cb(b):
-            if (self.cell_semitrans_toggle.value):  
-                self.semi_transparent = True
-            else:
-                self.semi_transparent = False
-            self.i_plot.update()
-
-        self.cell_semitrans_toggle.observe(cell_semitrans_toggle_cb)
 
         #----
         self.cell_edges_toggle = Checkbox(
@@ -316,20 +295,17 @@ class SubstrateTab(object):
             if (self.cells_toggle.value):
                 self.cell_edges_toggle.disabled = False
                 self.cell_nucleus_toggle.disabled = False
-                self.cell_semitrans_toggle.disabled = False
-                # self.semi_transparent = True
             else:
                 self.cell_edges_toggle.disabled = True
                 self.cell_nucleus_toggle.disabled = True
-                self.cell_semitrans_toggle.disabled = True
 
         self.cells_toggle.observe(cells_toggle_cb)
 
         #---------------------
         self.substrates_toggle = Checkbox(
             description='Substrates',
-            disabled=substrates_default_disabled_flag,
-            value=False,
+            disabled=False,
+            value=True,
 #           layout=Layout(width=constWidth2),
         )
         def substrates_toggle_cb(b):
@@ -360,6 +336,103 @@ class SubstrateTab(object):
 
         self.grid_toggle.observe(grid_toggle_cb)
 
+        # Custom coloring by PhysiCell custom data
+        
+        self.color_custom = False
+        self.color_custom_datum = None
+        self.color_custom_cmap = None
+        self.scalarMap = None
+        self.color_custom_data = Checkbox(
+            description='Color by custom data value',
+            disabled=False,
+#           layout=Layout(width=constWidth2),
+        )
+
+        self.color_custom_data.observe(self.color_custom_data_cb)
+
+        self.list_custom_data = ["data1", "data2"]
+        self.field_custom_data = Dropdown(
+            options=self.list_custom_data,
+            value=self.list_custom_data[0],
+            disabled=(len(self.list_custom_data) == 0),
+            layout=Layout(width=constWidth)
+        )
+
+        self.field_custom_data.observe(self.field_custom_data_cb)
+        
+        self.custom_data_cmaps = ['viridis', 'jet', 'YlOrRd']
+        self.field_custom_data_cmap = Dropdown(
+            options=self.custom_data_cmaps,
+            value=self.custom_data_cmaps[0],
+            #     description='Field',
+           layout=Layout(width=constWidth)
+        )
+        self.color_custom_cmap = self.custom_data_cmaps[0]
+        
+        self.field_custom_data_cmap.observe(self.field_custom_data_cmap_cb)
+
+
+        # Custom coloring by physiboss node value
+
+        # self.list_nodes = ['<select a node>']        
+        # if celltypes_tab is not None:
+        cfg_file = celltypes_tab.cfg_filenames[0]
+        outputs = []
+        
+        
+        self.cell_types = list(celltypes_tab.cell_type_dict.values())
+        self.cfg_filenames = celltypes_tab.cfg_filenames
+        self.selected_cell_type = 0
+        self.field_physiboss_id_celldef = Dropdown(
+            options=self.cell_types,
+            value=self.cell_types[self.selected_cell_type],
+            layout=Layout(width=constWidth)
+        )
+        self.field_physiboss_id_celldef.observe(self.field_physiboss_id_celldef_cb)
+
+        
+        cfg_file = celltypes_tab.cfg_filenames[self.selected_cell_type]
+        self.list_nodes = []
+        if cfg_file is not None:
+            with open(os.path.join("data", cfg_file.value), 'r') as cfg:
+                for line in cfg:
+                    if ".is_internal" in line:
+                        t_node, r = line.split(".")
+                        _, val = r.split("=")
+                        val = 1 if val.strip()[:-1] in ["1", "TRUE"] else 0
+                        if val == 0:
+                            outputs.append(t_node.strip())
+
+            self.list_nodes = outputs
+            
+        
+        
+        self.field_physiboss_node = Dropdown(
+            options=self.list_nodes,
+            value=(self.list_nodes[0] if len(self.list_nodes) > 0 else None),
+            disabled=(len(self.list_nodes) == 0),
+            #     description='Field',
+            layout=Layout(width=constWidth)
+        )
+
+        
+        self.color_physiboss = False
+        self.color_physiboss_node = self.list_nodes[0] if len(self.list_nodes) > 0 else None
+
+#        self.field_cmap.observe(self.plot_substrate)
+    
+      
+        self.field_physiboss_node.observe(self.field_physiboss_cb)
+    
+        
+        self.physiboss = Checkbox(
+            description='Color by PhysiBoSS value',
+            disabled=False,
+#           layout=Layout(width=constWidth2),
+        )
+
+        self.physiboss.observe(self.physiboss_cb)
+
 #        field_cmap_row3 = Box([self.save_min_max, self.cmap_min, self.cmap_max])
 
         # mcds_tab = widgets.VBox([mcds_dir, mcds_plot, mcds_play], layout=tab_layout)
@@ -376,9 +449,7 @@ class SubstrateTab(object):
                             align_items='stretch',
                             flex_direction='row',
                             display='flex')) 
-        # row1b = Box( [self.cells_toggle, self.cell_nucleus_toggle, self.cell_edges_toggle], layout=Layout(border='1px solid black',
-        # row1b = Box( [self.cells_toggle, self.cell_semitrans_toggle, self.cell_edges_toggle], layout=Layout(border='1px solid black',
-        row1b = Box( [self.cells_toggle, self.cell_edges_toggle], layout=Layout(border='1px solid black',
+        row1b = Box( [self.cells_toggle, self.cell_nucleus_toggle, self.cell_edges_toggle], layout=Layout(border='1px solid black',
                             width='50%',
                             height='',
                             align_items='stretch',
@@ -402,6 +473,22 @@ class SubstrateTab(object):
         # row2 = HBox( [row2a, self.substrates_toggle, self.grid_toggle])
         row2 = HBox( [row2a, Label('.....'), row2b])
 
+        row3a = Box([self.color_custom_data, self.field_custom_data, self.field_custom_data_cmap], layout=Layout(border='1px solid black',
+                            width='50%',
+                            height='',
+                            align_items='stretch',
+                            flex_direction='row',
+                            display='flex'))
+                            
+        row3b = Box([self.physiboss, self.field_physiboss_id_celldef, self.field_physiboss_node], layout=Layout(border='1px solid black',
+                            width='50%',
+                            height='',
+                            align_items='stretch',
+                            flex_direction='row',
+                            display='flex'))
+        
+        row3 = HBox( [row3a, Label('.....'), row3b])
+        
         if (hublib_flag):
             self.download_button = Download('mcds.zip', style='warning', icon='cloud-download', 
                                                 tooltip='Download data', cb=self.download_cb)
@@ -411,12 +498,12 @@ class SubstrateTab(object):
             download_row = HBox([self.download_button.w, self.download_svg_button.w, Label("Download all cell plots (browser must allow pop-ups).")])
 
             # box_layout = Layout(border='0px solid')
-            controls_box = VBox([row1, row2])  # ,width='50%', layout=box_layout)
+            controls_box = VBox([row1, row2, row3])  # ,width='50%', layout=box_layout)
             self.tab = VBox([controls_box, self.i_plot, download_row])
             # self.tab = VBox([controls_box, self.debug_str, self.i_plot, download_row])
         else:
             # self.tab = VBox([row1, row2])
-            self.tab = VBox([row1, row2, self.i_plot])
+            self.tab = VBox([row1, row2, row3, self.i_plot])
 
     #---------------------------------------------------
     def update_dropdown_fields(self, data_dir):
@@ -466,10 +553,62 @@ class SubstrateTab(object):
 #             #     description='Field',
 #            layout=Layout(width=constWidth)
 #         )
+        labels = xml_root.find('./cellular_information/cell_populations/cell_population/custom/simplified_data[2]//labels')
+        custom_datas = []
+        for i, label in enumerate(labels.getchildren()):
+            if i >= 19:
+                custom_datas.append(label.text)
+                
+        self.field_custom_data.options = custom_datas
+        self.field_custom_data.value = custom_datas[0]
+        self.field_custom_data_cmap.value = self.custom_data_cmaps[0]
+
 
     # def update_max_frames_expected(self, value):  # called when beginning an interactive Run
     #     self.max_frames.value = value  # assumes naming scheme: "snapshot%08d.svg"
     #     self.mcds_plot.children[0].max = self.max_frames.value
+    def field_physiboss_id_celldef_cb(self, b):
+        
+        if isinstance(b['new'], dict) and 'index' in b['new'].keys():
+            self.list_nodes = []
+
+            cfg_file = self.cfg_filenames[int(b['new']['index'])]
+            if cfg_file is not None:
+                outputs = []
+                with open(os.path.join(self.output_dir, cfg_file.value), 'r') as cfg:
+                    for line in cfg:
+                        if ".is_internal" in line:
+                            t_node, r = line.split(".")
+                            _, val = r.split("=")
+                            val = 1 if val.strip()[:-1] in ["1", "TRUE"] else 0
+                            if val == 0:
+                                outputs.append(t_node.strip())
+
+                self.list_nodes = outputs
+        
+            self.color_physiboss_node = (self.list_nodes[0] if len(self.list_nodes) > 0 else None)
+            self.field_physiboss_node.options = self.list_nodes
+            self.field_physiboss_node.disabled = (len(self.list_nodes) == 0)
+
+    def field_physiboss_cb(self, b):
+        self.color_physiboss_node = self.field_physiboss_node.value
+        self.i_plot.update()
+
+    def physiboss_cb(self, b):
+        self.color_physiboss = self.physiboss.value
+        self.i_plot.update()
+
+    def color_custom_data_cb(self, b):
+        self.color_custom = self.color_custom_data.value
+        self.i_plot.update()
+    
+    def field_custom_data_cb(self, b):
+        self.color_custom_datum = self.field_custom_data.value
+        self.i_plot.update()
+    
+    def field_custom_data_cmap_cb(self, b):
+        self.color_custom_cmap = self.field_custom_data_cmap.value
+        self.i_plot.update()
 
 #------------------------------------------------------------------------------
     def update_params(self, config_tab, user_params_tab):
@@ -547,10 +686,10 @@ class SubstrateTab(object):
             # self.modulo = int((self.num_svgs - 1) / (self.num_substrates - 1))
             # print("substrates: update(): modulo=",self.modulo)        
             if full_xml_filename.is_file():
-                tree = ET.parse(full_xml_filename)  # this file cannot be overwritten; part of tool distro
+                tree = ET.parse(str(full_xml_filename))  # this file cannot be overwritten; part of tool distro
                 xml_root = tree.getroot()
-                self.svg_delta_t = int(xml_root.find(".//SVG//interval").text)
-                self.substrate_delta_t = int(xml_root.find(".//full_data//interval").text)
+                self.svg_delta_t = int(float(xml_root.find(".//SVG//interval").text))
+                self.substrate_delta_t = int(float(xml_root.find(".//full_data//interval").text))
                 # print("substrates: svg,substrate delta_t values=",self.svg_delta_t,self.substrate_delta_t)        
                 self.modulo = int(self.substrate_delta_t / self.svg_delta_t)
                 # print("substrates: update(): modulo=",self.modulo)        
@@ -776,6 +915,50 @@ class SubstrateTab(object):
                 break
             numChildren += 1
 
+        cell_ids = []
+        for child in cells_parent:
+            cell_ids.append(int(child.attrib["id"][4:]))
+
+        if self.color_custom:
+            fname = "output%08d_cells_physicell.mat" % frame
+            full_fname = os.path.join(self.output_dir, fname)
+            
+            if not os.path.isfile(full_fname):
+                print("Once output files are generated, click the slider.")  # No:  output00000000_microenvironment0.mat
+                return
+            # print("Reading %s" % fname)
+            info_dict = {}
+            scipy.io.loadmat(full_fname, info_dict)
+
+            M = info_dict['cells'][27+self.field_custom_data.index, :]
+            ids = info_dict['cells'][0, :].astype(int)
+            vmin = np.min(M)
+            vmax = np.max(M)
+            
+            import matplotlib as mpl
+            from matplotlib import cm
+            
+            if vmin != vmax:
+                norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
+            else:
+                norm = mpl.colors.Normalize(vmin=0, vmax=vmax)
+                
+            self.scalarMap = cm.ScalarMappable(norm=norm, cmap=self.field_custom_data_cmap.value)
+            
+                
+        elif self.color_physiboss:
+        
+            import csv
+            
+            states_dict = {}
+            with open('%s//states_%08u.csv' %(self.output_dir,frame), newline='') as csvfile:
+                states_reader = csv.reader(csvfile, delimiter=',')
+                    
+                for row in states_reader:
+                    if row[0] != 'ID' and int(row[0]) in cell_ids and row[1] != "<nil>":
+                        nodes = row[1].split(" -- ")
+                        states_dict[int(row[0])] = nodes
+
         num_cells = 0
         #  print('------ search cells')
         for child in cells_parent:
@@ -793,12 +976,29 @@ class SubstrateTab(object):
                 s = circle.attrib['fill']
                 # print("s=",s)
                 # print("type(s)=",type(s))
-                if (s[0:3] == "rgb"):  # if an rgb string, e.g. "rgb(175,175,80)" 
-                    rgb = list(map(int, s[4:-1].split(",")))  
-                    rgb[:] = [x / 255. for x in rgb]
-                else:     # otherwise, must be a color name
-                    rgb_tuple = mplc.to_rgb(mplc.cnames[s])  # a tuple
-                    rgb = [x for x in rgb_tuple]
+                if self.color_custom and self.color_custom_datum is not None and self.color_custom_cmap is not None:
+                 
+                    index_id = list(ids).index(int(child.attrib['id'][4:]))
+                    rgb = self.scalarMap.to_rgba(M[index_id])
+                    
+                else:
+                    if self.color_physiboss and self.color_physiboss_node is not None and self.color_physiboss_node[0] != '<':
+                        
+                        if int(child.attrib['id'][4:]) in states_dict.keys():
+                            if self.color_physiboss_node in states_dict[int(child.attrib['id'][4:])]:
+                                rgb = [0, 0.5, 0]
+                            else:
+                                rgb = [1, 0, 0]
+                        else:
+                            rgb = [0, 0, 0.5]
+                        
+                    else:
+                        if (s[0:3] == "rgb"):  # if an rgb string, e.g. "rgb(175,175,80)" 
+                            rgb = list(map(int, s[4:-1].split(",")))  
+                            rgb[:] = [x / 255. for x in rgb]
+                        else:     # otherwise, must be a color name
+                            rgb_tuple = mplc.to_rgb(mplc.cnames[s])  # a tuple
+                            rgb = [x for x in rgb_tuple]
 
                 # test for bogus x,y locations (rwh TODO: use max of domain?)
                 too_large_val = 10000.
@@ -885,19 +1085,17 @@ class SubstrateTab(object):
         # print('max=',markers_size.max())
 
         #rwh - temp fix - Ah, error only occurs when "edges" is toggled on
-        # alpha_val = 1.0
-        # if (self.semi_transparent):
-        #     alpha_val = 0.5
         if (self.show_edge):
             try:
-                # self.circles(xvals,yvals, s=rvals, color=rgbs, edgecolor='black', linewidth=0.5, alpha=alpha_val)
-                cell_circles = self.circles(xvals,yvals, s=rvals, color=rgbs, edgecolor='black', linewidth=0.5)
+                # plt.scatter(xvals,yvals, s=markers_size, c=rgbs, edgecolor='black', linewidth=0.5)
+                self.circles(xvals,yvals, s=rvals, color=rgbs, edgecolor='black', linewidth=0.5)
+                # cell_circles = self.circles(xvals,yvals, s=rvals, color=rgbs, edgecolor='black', linewidth=0.5)
                 # plt.sci(cell_circles)
             except (ValueError):
                 pass
         else:
+            # plt.scatter(xvals,yvals, s=markers_size, c=rgbs)
             self.circles(xvals,yvals, s=rvals, color=rgbs)
-            # self.circles(xvals,yvals, s=rvals, color=rgbs, alpha=alpha_val, edgecolor=None )
 
         # if (self.show_tracks):
         #     for key in self.trackd.keys():
@@ -937,7 +1135,7 @@ class SubstrateTab(object):
         if (self.substrates_toggle.value):
             # self.fig = plt.figure(figsize=(14, 15.6))
             # self.fig = plt.figure(figsize=(15.0, 12.5))
-            self.fig = plt.figure(figsize=(self.figsize_width_substrate, self.figsize_height_substrate))
+            self.fig = plt.figure(figsize=(self.figsize_width_substrate + (3.0 if self.color_custom else 0.0), self.figsize_height_substrate))
 
             # rwh - funky way to figure out substrate frame for pc4cancerbots (due to user-defined "save_interval*")
             # self.cell_time_mins 
@@ -1037,13 +1235,40 @@ class SubstrateTab(object):
             #     self.numy =  math.ceil( (self.ymax - self.ymin) / dy)
 
             try:
-                xgrid = M[0, :].reshape(self.numy, self.numx)
-                ygrid = M[1, :].reshape(self.numy, self.numx)
+            
+                if M[1, :].shape[0] > (self.numx * self.numy):
+                    
+                    # Here we need to choose a slice in the z dim
+                    # In PhysiCell, the printed cells are all who cross the z=0 plane
+                    # abs(position - 0) < cell_radius
+                    # We can't do that here, and our best choices are [-z_delta, 0] and [0, z_delta]
+                    # So we choose (arbitrarly) [0, z_delta]
+                    # And if it fails, we panic and take the first one
+                    
+                    # We look at all the possible z values
+                    z_list = np.unique(M[2, :])
+                    
+                    # We take the first one > 0
+                    try:
+                        t_z = next(obj for obj in z_list if obj>0)
+                        
+                    # Or just the first one
+                    except StopIteration:
+                        t_z = z_list[0]
+                    
+                    list_indexes = np.where(M[2, :] == t_z)
+                    
+                    xgrid = M[0, list_indexes].reshape(self.numy, self.numx)
+                    ygrid = M[1, list_indexes].reshape(self.numy, self.numx)
+                    substrate_grid = M[self.field_index, list_indexes].reshape(self.numy, self.numx)
+                    
+                else:   
+                    xgrid = M[0, :].reshape(self.numy, self.numx)
+                    ygrid = M[1, :].reshape(self.numy, self.numx)
+                    substrate_grid = M[self.field_index, :].reshape(self.numy, self.numx)
             except:
                 print("substrates.py: mismatched mesh size for reshape: numx,numy=",self.numx, self.numy)
                 pass
-#                xgrid = M[0, :].reshape(self.numy, self.numx)
-#                ygrid = M[1, :].reshape(self.numy, self.numx)
 
             num_contours = 15
             levels = MaxNLocator(nbins=num_contours).tick_values(self.cmap_min.value, self.cmap_max.value)
@@ -1051,14 +1276,14 @@ class SubstrateTab(object):
             if (self.cmap_fixed_toggle.value):
                 try:
                     # substrate_plot = main_ax.contourf(xgrid, ygrid, M[self.field_index, :].reshape(self.numy, self.numx), levels=levels, extend='both', cmap=self.field_cmap.value, fontsize=self.fontsize)
-                    substrate_plot = plt.contourf(xgrid, ygrid, M[self.field_index, :].reshape(self.numy, self.numx), levels=levels, extend='both', cmap=self.field_cmap.value, fontsize=self.fontsize)
+                    substrate_plot = plt.contourf(xgrid, ygrid, substrate_grid, levels=levels, extend='both', cmap=self.field_cmap.value, fontsize=self.fontsize)
                 except:
                     contour_ok = False
                     # print('got error on contourf 1.')
             else:    
                 try:
                     # substrate_plot = main_ax.contourf(xgrid, ygrid, M[self.field_index, :].reshape(self.numy,self.numx), num_contours, cmap=self.field_cmap.value)
-                    substrate_plot = plt.contourf(xgrid, ygrid, M[self.field_index, :].reshape(self.numy,self.numx), num_contours, cmap=self.field_cmap.value)
+                    substrate_plot = plt.contourf(xgrid, ygrid, substrate_grid, num_contours, cmap=self.field_cmap.value)
                 except:
                     contour_ok = False
                     # print('got error on contourf 2.')
@@ -1069,6 +1294,10 @@ class SubstrateTab(object):
                 # main_ax.tick_params(labelsize=self.fontsize)
             # cbar = plt.colorbar(my_plot)
                 # cbar = self.fig.colorbar(substrate_plot, ax=main_ax)
+                if self.scalarMap is not None and self.color_custom:
+                    cbar2 = self.fig.colorbar(self.scalarMap)
+                    cbar2.ax.tick_params(labelsize=self.fontsize)
+            
                 cbar = self.fig.colorbar(substrate_plot)
                 cbar.ax.tick_params(labelsize=self.fontsize)
                 # cbar = main_ax.colorbar(my_plot)
@@ -1098,7 +1327,13 @@ class SubstrateTab(object):
         if (self.cells_toggle.value):
             if (not self.substrates_toggle.value):
                 # self.fig = plt.figure(figsize=(12, 12))
-                self.fig = plt.figure(figsize=(self.figsize_width_svg, self.figsize_height_svg))
+                if self.scalarMap is not None and self.color_custom:
+                    self.fig = plt.figure(figsize=(self.figsize_width_svg+3.0, self.figsize_height_svg))
+                    cbar2 = self.fig.colorbar(self.scalarMap)
+                    cbar2.ax.tick_params(labelsize=self.fontsize)
+                    
+                else:            
+                    self.fig = plt.figure(figsize=(self.figsize_width_svg, self.figsize_height_svg))
             # self.plot_svg(frame)
             self.svg_frame = frame
             # print('plot_svg with frame=',self.svg_frame)

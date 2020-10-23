@@ -1,5 +1,5 @@
 VERSION := $(shell grep . VERSION.txt | cut -f1 -d:)
-PROGRAM_NAME := myproj
+PROGRAM_NAME:= myproj
 
 CC := g++
 
@@ -55,6 +55,7 @@ ARCH := native # best auto-tuning
 # CFLAGS := -march=$(ARCH) -Ofast -s -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
 # remove the -march arg to avoid SIGILL error on nanoHUB
 #CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
+# remove the -march arg to avoid SIGILL error on nanoHUB
 CFLAGS := -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
 #CFLAGS := -g -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
 
@@ -84,7 +85,7 @@ ALL_OBJECTS := $(PhysiCell_OBJECTS) $(PhysiCell_custom_module_OBJECTS) $(PhysiBo
 # compile the project 
 
 all: MaBoSS main.cpp $(ALL_OBJECTS)
-	$(COMPILE_COMMAND) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp $(LIB)
+	$(COMPILE_COMMAND) $(INC) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp $(LIB)
 
 # PhysiCell core components	
 
@@ -211,9 +212,17 @@ distclean: clean
 MaBoSS-clean:
 	cd $(MABOSS_DIR)/src && make clean
 	
-clean: MaBoSS-clean
+# next 2 targets for nanoHUB
+install: 
+	. /etc/environ.sh; use -e -r anaconda3-5.1; make all
+	cp $(PROGRAM_NAME) ../bin
+
+distclean: clean
+	rm -f ../bin/$(PROGRAM_NAME)
+
+clean:
 	rm -f *.o
-	rm -f $(PROGRAM_NAME)*
+	rm -f $(PROGRAM_NAME)
 	
 	
 data-cleanup:
