@@ -1,0 +1,13 @@
+version: "3.3"
+services:
+
+  pb4covid19:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      
+    image: pb4covid19
+    container_name: pb4covid19
+    ports:
+      - "8888:8888"
+
