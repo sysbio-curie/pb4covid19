@@ -983,7 +983,6 @@ class SubstrateTab(object):
                     
                 else:
                     if self.color_physiboss and self.color_physiboss_node is not None and self.color_physiboss_node[0] != '<':
-                        
                         if int(child.attrib['id'][4:]) in states_dict.keys():
                             if self.color_physiboss_node in states_dict[int(child.attrib['id'][4:])]:
                                 rgb = [0, 0.5, 0]
