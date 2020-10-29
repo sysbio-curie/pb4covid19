@@ -1,4 +1,4 @@
-FROM ubuntu:bionic
+FROM ubuntu:focal
 MAINTAINER Vincent Noel <contact@vincent-noel.fr>
 
 USER root
