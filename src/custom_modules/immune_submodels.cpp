@@ -669,10 +669,8 @@ void neutrophil_phenotype( Cell* pCell, Phenotype& phenotype, double dt )
 			UniformRandom() < probability_of_phagocytosis && 
 			pTestCell->phenotype.volume.total < max_phagocytosis_volume )
 		{
-			#pragma omp critical(neutrophil_eat)
+			// #pragma omp critical(neutrophil_eat)
 			{
-				std::cout << "Neutrophil is eating, and being activated" << std::endl;		
-			}{
 				// remove_all_adhesions( pTestCell ); // debug 
 				pCell->ingest_cell( pTestCell ); 
 			}

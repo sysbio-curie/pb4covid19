@@ -174,52 +174,68 @@ class UserTab(object):
           step=0.1,
           style=style, layout=widget_layout)
 
+        param_name19 = Button(description='m_inhibition_percentage', disabled=True, layout=name_button_layout)
+        param_name19.style.button_color = 'lightgreen'
+
+        self.m_inhibition_percentage = FloatText(
+          value=0.0,
+          step=0.01,
+          style=style, layout=widget_layout)
+
+        param_name20 = Button(description='fadd_inhibition_percentage', disabled=True, layout=name_button_layout)
+        param_name20.style.button_color = 'tan'
+
+        self.fadd_inhibition_percentage = FloatText(
+          value=0.0,
+          step=0.01,
+          style=style, layout=widget_layout)
+
         div_row3 = Button(description='---Cell Color Options--', disabled=True, layout=divider_button_layout)
 
-        param_name19 = Button(description='color_variable', disabled=True, layout=name_button_layout)
-        param_name19.style.button_color = 'lightgreen'
+        param_name21 = Button(description='color_variable', disabled=True, layout=name_button_layout)
+        param_name21.style.button_color = 'lightgreen'
 
         self.color_variable = Text(
           value='assembled_virion',
           style=style, layout=widget_layout)
 
-        param_name20 = Button(description='apoptotic_epithelium_color', disabled=True, layout=name_button_layout)
-        param_name20.style.button_color = 'tan'
+        param_name22 = Button(description='apoptotic_epithelium_color', disabled=True, layout=name_button_layout)
+        param_name22.style.button_color = 'tan'
 
         self.apoptotic_epithelium_color = Text(
           value='black',
           style=style, layout=widget_layout)
 
-        param_name21 = Button(description='apoptotic_immune_color', disabled=True, layout=name_button_layout)
-        param_name21.style.button_color = 'lightgreen'
+        param_name23 = Button(description='apoptotic_immune_color', disabled=True, layout=name_button_layout)
+        param_name23.style.button_color = 'lightgreen'
 
         self.apoptotic_immune_color = Text(
           value='rosybrown',
           style=style, layout=widget_layout)
 
-        param_name22 = Button(description='CD8_Tcell_color', disabled=True, layout=name_button_layout)
-        param_name22.style.button_color = 'tan'
+        param_name24 = Button(description='CD8_Tcell_color', disabled=True, layout=name_button_layout)
+        param_name24.style.button_color = 'tan'
 
         self.CD8_Tcell_color = Text(
           value='red',
           style=style, layout=widget_layout)
 
-        param_name23 = Button(description='Macrophage_color', disabled=True, layout=name_button_layout)
-        param_name23.style.button_color = 'lightgreen'
+        param_name25 = Button(description='Macrophage_color', disabled=True, layout=name_button_layout)
+        param_name25.style.button_color = 'lightgreen'
 
         self.Macrophage_color = Text(
           value='lime',
           style=style, layout=widget_layout)
 
-        param_name24 = Button(description='activated_macrophage_color', disabled=True, layout=name_button_layout)
-        param_name24.style.button_color = 'tan'
+        param_name26 = Button(description='activated_macrophage_color', disabled=True, layout=name_button_layout)
+        param_name26.style.button_color = 'tan'
 
         self.activated_macrophage_color = Text(
           value='fuchsia',
           style=style, layout=widget_layout)
 
-        param_name25 = Button(description='Neutrophil_color', disabled=True, layout=name_button_layout)
-        param_name25.style.button_color = 'lightgreen'
+        param_name27 = Button(description='Neutrophil_color', disabled=True, layout=name_button_layout)
+        param_name27.style.button_color = 'lightgreen'
 
         self.Neutrophil_color = Text(
           value='cyan',
@@ -266,9 +282,9 @@ class UserTab(object):
         units_button20 = Button(description='percentage', disabled=True, layout=units_button_layout) 
         units_button20.style.button_color = 'tan'
         units_button21 = Button(description='', disabled=True, layout=units_button_layout) 
-        units_button21.style.button_color = 'tan'
+        units_button21.style.button_color = 'lightgreen'
         units_button22 = Button(description='', disabled=True, layout=units_button_layout) 
-        units_button22.style.button_color = 'lightgreen'
+        units_button22.style.button_color = 'tan'
         units_button23 = Button(description='', disabled=True, layout=units_button_layout) 
         units_button23.style.button_color = 'tan'
         units_button24 = Button(description='', disabled=True, layout=units_button_layout) 
@@ -281,6 +297,10 @@ class UserTab(object):
         units_button27.style.button_color = 'tan'
         units_button28 = Button(description='', disabled=True, layout=units_button_layout) 
         units_button28.style.button_color = 'lightgreen'
+        units_button29 = Button(description='', disabled=True, layout=units_button_layout) 
+        units_button29.style.button_color = 'tan'
+        units_button30 = Button(description='', disabled=True, layout=units_button_layout) 
+        units_button30.style.button_color = 'lightgreen'
 
         desc_button1 = Button(description='' , tooltip='', disabled=True, layout=desc_button_layout) 
         desc_button1.style.button_color = 'lightgreen'
@@ -318,20 +338,24 @@ class UserTab(object):
         desc_button17.style.button_color = 'lightgreen'
         desc_button18 = Button(description='percentage of tissue sitting above blood vessels' , tooltip='percentage of tissue sitting above blood vessels', disabled=True, layout=desc_button_layout) 
         desc_button18.style.button_color = 'tan'
-        desc_button19 = Button(description='color cells based on this variable' , tooltip='color cells based on this variable', disabled=True, layout=desc_button_layout) 
+        desc_button19 = Button(description='ratio of the population capable of inhibiting M protein' , tooltip='ratio of the population capable of inhibiting M protein', disabled=True, layout=desc_button_layout) 
         desc_button19.style.button_color = 'lightgreen'
-        desc_button20 = Button(description='apoptotic epithelial cell color' , tooltip='apoptotic epithelial cell color', disabled=True, layout=desc_button_layout) 
+        desc_button20 = Button(description='ratio of the population capable of inhibiting FADD protein' , tooltip='ratio of the population capable of inhibiting FADD protein', disabled=True, layout=desc_button_layout) 
         desc_button20.style.button_color = 'tan'
-        desc_button21 = Button(description='apoptotic immune cell color' , tooltip='apoptotic immune cell color', disabled=True, layout=desc_button_layout) 
+        desc_button21 = Button(description='color cells based on this variable' , tooltip='color cells based on this variable', disabled=True, layout=desc_button_layout) 
         desc_button21.style.button_color = 'lightgreen'
-        desc_button22 = Button(description='CD8 T cell color' , tooltip='CD8 T cell color', disabled=True, layout=desc_button_layout) 
+        desc_button22 = Button(description='apoptotic epithelial cell color' , tooltip='apoptotic epithelial cell color', disabled=True, layout=desc_button_layout) 
         desc_button22.style.button_color = 'tan'
-        desc_button23 = Button(description='macrophage color' , tooltip='macrophage color', disabled=True, layout=desc_button_layout) 
+        desc_button23 = Button(description='apoptotic immune cell color' , tooltip='apoptotic immune cell color', disabled=True, layout=desc_button_layout) 
         desc_button23.style.button_color = 'lightgreen'
-        desc_button24 = Button(description='color of activated macrophage' , tooltip='color of activated macrophage', disabled=True, layout=desc_button_layout) 
+        desc_button24 = Button(description='CD8 T cell color' , tooltip='CD8 T cell color', disabled=True, layout=desc_button_layout) 
         desc_button24.style.button_color = 'tan'
-        desc_button25 = Button(description='neutrophil color' , tooltip='neutrophil color', disabled=True, layout=desc_button_layout) 
+        desc_button25 = Button(description='macrophage color' , tooltip='macrophage color', disabled=True, layout=desc_button_layout) 
         desc_button25.style.button_color = 'lightgreen'
+        desc_button26 = Button(description='color of activated macrophage' , tooltip='color of activated macrophage', disabled=True, layout=desc_button_layout) 
+        desc_button26.style.button_color = 'tan'
+        desc_button27 = Button(description='neutrophil color' , tooltip='neutrophil color', disabled=True, layout=desc_button_layout) 
+        desc_button27.style.button_color = 'lightgreen'
 
         row1 = [param_name1, self.random_seed, units_button1, desc_button1] 
         row2 = [param_name2, self.immune_dt, units_button3, desc_button2] 
@@ -351,13 +375,15 @@ class UserTab(object):
         row16 = [param_name16, self.number_of_macrophages, units_button18, desc_button16] 
         row17 = [param_name17, self.number_of_neutrophils, units_button19, desc_button17] 
         row18 = [param_name18, self.perecentage_tissue_vascularized, units_button20, desc_button18] 
-        row19 = [param_name19, self.color_variable, units_button22, desc_button19] 
-        row20 = [param_name20, self.apoptotic_epithelium_color, units_button23, desc_button20] 
-        row21 = [param_name21, self.apoptotic_immune_color, units_button24, desc_button21] 
-        row22 = [param_name22, self.CD8_Tcell_color, units_button25, desc_button22] 
-        row23 = [param_name23, self.Macrophage_color, units_button26, desc_button23] 
-        row24 = [param_name24, self.activated_macrophage_color, units_button27, desc_button24] 
-        row25 = [param_name25, self.Neutrophil_color, units_button28, desc_button25] 
+        row19 = [param_name19, self.m_inhibition_percentage, units_button21, desc_button19] 
+        row20 = [param_name20, self.fadd_inhibition_percentage, units_button22, desc_button20] 
+        row21 = [param_name21, self.color_variable, units_button24, desc_button21] 
+        row22 = [param_name22, self.apoptotic_epithelium_color, units_button25, desc_button22] 
+        row23 = [param_name23, self.apoptotic_immune_color, units_button26, desc_button23] 
+        row24 = [param_name24, self.CD8_Tcell_color, units_button27, desc_button24] 
+        row25 = [param_name25, self.Macrophage_color, units_button28, desc_button25] 
+        row26 = [param_name26, self.activated_macrophage_color, units_button29, desc_button26] 
+        row27 = [param_name27, self.Neutrophil_color, units_button30, desc_button27] 
 
         box_layout = Layout(display='flex', flex_flow='row', align_items='stretch', width='100%')
         box1 = Box(children=row1, layout=box_layout)
@@ -385,6 +411,8 @@ class UserTab(object):
         box23 = Box(children=row23, layout=box_layout)
         box24 = Box(children=row24, layout=box_layout)
         box25 = Box(children=row25, layout=box_layout)
+        box26 = Box(children=row26, layout=box_layout)
+        box27 = Box(children=row27, layout=box_layout)
 
         self.tab = VBox([
           box1,
@@ -407,14 +435,16 @@ class UserTab(object):
           box16,
           box17,
           box18,
-          div_row3,
           box19,
           box20,
+          div_row3,
           box21,
           box22,
           box23,
           box24,
           box25,
+          box26,
+          box27,
         ])
 
     # Populate the GUI widgets with values from the XML
@@ -444,6 +474,8 @@ class UserTab(object):
         self.number_of_macrophages.value = int(uep.find('.//number_of_macrophages').text)
         self.number_of_neutrophils.value = int(uep.find('.//number_of_neutrophils').text)
         self.perecentage_tissue_vascularized.value = float(uep.find('.//perecentage_tissue_vascularized').text)
+        self.m_inhibition_percentage.value = float(uep.find('.//m_inhibition_percentage').text)
+        self.fadd_inhibition_percentage.value = float(uep.find('.//fadd_inhibition_percentage').text)
         self.color_variable.value = (uep.find('.//color_variable').text)
         self.apoptotic_epithelium_color.value = (uep.find('.//apoptotic_epithelium_color').text)
         self.apoptotic_immune_color.value = (uep.find('.//apoptotic_immune_color').text)
@@ -480,6 +512,8 @@ class UserTab(object):
         uep.find('.//number_of_macrophages').text = str(self.number_of_macrophages.value)
         uep.find('.//number_of_neutrophils').text = str(self.number_of_neutrophils.value)
         uep.find('.//perecentage_tissue_vascularized').text = str(self.perecentage_tissue_vascularized.value)
+        uep.find('.//m_inhibition_percentage').text = str(self.m_inhibition_percentage.value)
+        uep.find('.//fadd_inhibition_percentage').text = str(self.fadd_inhibition_percentage.value)
         uep.find('.//color_variable').text = str(self.color_variable.value)
         uep.find('.//apoptotic_epithelium_color').text = str(self.apoptotic_epithelium_color.value)
         uep.find('.//apoptotic_immune_color').text = str(self.apoptotic_immune_color.value)

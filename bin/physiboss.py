@@ -118,20 +118,22 @@ class PhysiBoSSTab(object):
         self.svg_plot.children[0].max = self.max_frames.value
 
     def create_dict(self, number_of_files, folder):
-            "create a dictionary with the states file in the folder 'output', half of the dict is used to calculate the percentage of the node, the other half is for the states"
+        "create a dictionary with the states file in the folder 'output', half of the dict is used to calculate the percentage of the node, the other half is for the states"
 
-            if number_of_files > 0:
-                for i in range (0, number_of_files): 
-                    if "state_step{0}".format(i) not in self.file_dict.keys():
-                        states_dict = {}
-                        with open(os.path.join(self.output_dir, 'states_%08u.csv' % i), newline='') as csvfile:
-                            states_reader = csv.reader(csvfile, delimiter=',')
-                        
-                            for row in states_reader:
-                                if row[0] != 'ID':
-                                    states_dict[int(row[0])] = row[1]
-                
-                        self.file_dict["state_step{0}".format(i)] = states_dict
+        if number_of_files > 0:
+            for i in range (0, number_of_files): 
+                if "state_step{0}".format(i) not in self.file_dict.keys():
+                    states_dict = {}
+                    with open(os.path.join(self.output_dir, 'states_%08u.csv' % i), newline='') as csvfile:
+                        states_reader = csv.reader(csvfile, delimiter=',')
+                    
+                        for row in states_reader:
+                            if row[0] != 'ID':
+                                states_dict[int(row[0])] = row[1]
+            
+                    self.file_dict["state_step{0}".format(i)] = states_dict
+
+
 
     def state_counter(self, number_of_files, percentage, cell_indexes, cell_line):
         "create a dict with the states of the network, it can be used to print states pie chart"
@@ -188,7 +190,7 @@ class PhysiBoSSTab(object):
         all_state = []
         a = []
         for k in self.count_dict:
-            state_list.append(list(self.count_dict[k].keys()))
+            state_list.append([key for key, value in self.count_dict[k].items() if value > 0])
             for l in state_list:
                 for state in l:
                     all_state.append(state)
