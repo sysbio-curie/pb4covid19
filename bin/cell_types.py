@@ -895,12 +895,12 @@ class CellTypesTab(object):
         div_row12.style.button_color = 'orange'
         bnd_filename = Button(description='bnd_filename', disabled=True, layout=name_button_layout)
         bnd_filename.style.button_color = 'lightgreen'
-        self.bnd_filenames[1] = Text(value='../data/boolean_network/epithelial_cell.bnd', style=style, layout=widget_layout)
+        self.bnd_filenames[1] = Text(value='../data/boolean_network/epithelial_cell_2.bnd', style=style, layout=widget_layout)
         row = [bnd_filename, self.bnd_filenames[1]]
         box84 = Box(children=row, layout=box_layout)
         cfg_filename = Button(description='cfg_filename', disabled=True, layout=name_button_layout)
         cfg_filename.style.button_color = 'tan'
-        self.cfg_filenames[1] = Text(value='../data/boolean_network/epithelial_cell.cfg', style=style, layout=widget_layout)
+        self.cfg_filenames[1] = Text(value='../data/boolean_network/epithelial_cell_2.cfg', style=style, layout=widget_layout)
         row = [cfg_filename, self.cfg_filenames[1]]
         box85 = Box(children=row, layout=box_layout)
         time_step = Button(description='time_step', disabled=True, layout=name_button_layout)
